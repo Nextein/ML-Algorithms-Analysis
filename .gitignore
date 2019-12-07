@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+*.ipynb
+*.pdf
+
+
 # User-specific files
 *.rsuser
 *.suo
@@ -348,3 +352,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/linear_regression_using_bayes_inference.py
+/bayesian_inference.py
