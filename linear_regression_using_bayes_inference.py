@@ -25,11 +25,12 @@ n_samples = 100
 # With means of 0:
 w_samp = np.random.multivariate_normal(w_0.flatten(), sigma,size=n_samples)
 
-#fig = plt.figure(figsize=(10,5))
-#ax = fig.add_subplot(111)
+fig,ax = plt.subplots(2,2)
+fig.set_figheight(10)
+fig.set_figwidth(15)
 
-#for i in range(w_samp.shape[0]):
-#	plot_line(ax, w_samp[i,:])
+for i in range(w_samp.shape[0]):
+	plot_line(ax[0,0], w_samp[i,:])
 
 #plt.show()
 
@@ -39,13 +40,13 @@ The most likely line according to our prior is a horizontal line.
 The least likely line is a vertical line.
 When defined as a Gaussian, no line has zero probability. (Gaussian becomes 0 at infinity)
 '''
-
+from scipy.stats import multivariate_normal
 def plotdistribution(ax,mu,sigma):
-	x = np.linspace(-1.5,1.5,100)
+	x = np.linspace(-1.5,1.5,n_samples)
 	x1p, x2p = np.meshgrid(x,x)
 	pos = np.vstack((x1p.flatten(),x2p.flatten().T))
 
-	pdf.multivariate_normal(mu.flatten(),sigma)
+	pdf = multivariate_normal(mu.flatten(),sigma)
 	Z = pdf.pdf(pos)
 	Z = Z.reshape(100,100)
 
@@ -55,32 +56,47 @@ def plotdistribution(ax,mu,sigma):
 	ax.set_ylabel('w_1')
 	return
 
-X = np.linspace(-5,5,100)
-X = np.vstack((X,np.ones((100))))
-
-w_0 = np.array([3,0])
-y = w_0.dot(X)
-
+# GENERATE DATA
+X = np.linspace(-5,5,n_samples)
+X = np.vstack((X,np.ones((n_samples))))
+w = np.array([3,0])
+sigma = np.eye(2)
+#sigma = np.zeros((2,2))
+pprint(sigma)
+w_samp2 = np.random.multivariate_normal(w.flatten(), sigma,size=n_samples)
+# Ys = 100x100 (100 points for each w_samp)
+Ys = w_samp2.dot(X)
+Y = np.ones((100)).T
+#Sample Y:
+for i in range(n_samples):
+	Y[i] = Ys[i,i]
 
 
 
 index = np.random.permutation(X.shape[1])
 
-fig2 = plt.figure(figsize=(10,5))
-ax2 = fig2.add_subplot(111)
 
+for i in range(n_samples):
+	ax[0,1].scatter(X[0,:], Ys[i,:])
+ax[0,1].set_ylabel("Original data")
 error_precision = 3.33
 prior_mu = np.array([1,0]).T
 prior_sigma = np.eye(2)
 
-i=20
+# Change i to define how much data is used for training
+i=n_samples
 
 Xi = X[:,index[:i]].T
-Yi = y[index[:i]]
+Yi = Y[index[:i]]
 
-#posterior_mu = (np.linalg.inv(np.linalg.inv(prior_sigma) + error_precision*Xi.T*X)  *  (np.linalg.inv(prior_sigma)*prior_mu+error_precision*X.T*y)
 posterior_mu = np.linalg.inv(np.linalg.inv(prior_sigma)+error_precision*Xi.T.dot(Xi)).dot(np.linalg.inv(prior_sigma).dot(prior_mu) + error_precision*Xi.T.dot(Yi))
-plot_line(ax2,posterior_mu)
-ax2.scatter(Xi[:,0],Yi)
+posterior_sigma = np.linalg.inv(np.linalg.inv(prior_sigma)+error_precision*Xi.T.dot(Xi))
+print("prior: {}\noriginal: {}\nposterior: {}".format(prior_mu,w,posterior_mu))
+plot_line(ax[1,0],posterior_mu)
+ax[1,0].scatter(Xi[:,0],Yi)
+#plotdistribution has bugs :(
+#plotdistribution(ax[1,1],posterior_mu,posterior_sigma)
+
+ax[1,0].set_ylabel("posterior")
 
 plt.show()
