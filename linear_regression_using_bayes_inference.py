@@ -40,13 +40,13 @@ The most likely line according to our prior is a horizontal line.
 The least likely line is a vertical line.
 When defined as a Gaussian, no line has zero probability. (Gaussian becomes 0 at infinity)
 '''
-from scipy.stats import multivariate_normal
+
 def plotdistribution(ax,mu,sigma):
 	x = np.linspace(-1.5,1.5,n_samples)
 	x1p, x2p = np.meshgrid(x,x)
 	pos = np.vstack((x1p.flatten(),x2p.flatten().T))
 
-	pdf = multivariate_normal(mu.flatten(),sigma)
+	pdf = np.random.multivariate_normal(mu.flatten(),sigma)
 	Z = pdf.pdf(pos)
 	Z = Z.reshape(100,100)
 
@@ -80,11 +80,12 @@ for i in range(n_samples):
 	ax[0,1].scatter(X[0,:], Ys[i,:])
 ax[0,1].set_ylabel("Original data")
 error_precision = 3.33
-prior_mu = np.array([1,0]).T
+prior_mu = np.array([0,0]).T
 prior_sigma = np.eye(2)
 
 # Change i to define how much data is used for training
-i=n_samples
+#i=n_samples
+i=0
 
 Xi = X[:,index[:i]].T
 Yi = Y[index[:i]]
@@ -94,8 +95,8 @@ posterior_sigma = np.linalg.inv(np.linalg.inv(prior_sigma)+error_precision*Xi.T.
 print("prior: {}\noriginal: {}\nposterior: {}".format(prior_mu,w,posterior_mu))
 plot_line(ax[1,0],posterior_mu)
 ax[1,0].scatter(Xi[:,0],Yi)
-#plotdistribution has bugs :(
-#plotdistribution(ax[1,1],posterior_mu,posterior_sigma)
+plotdistribution has bugs :(
+plotdistribution(ax[1,1],posterior_mu,posterior_sigma)
 
 ax[1,0].set_ylabel("posterior")
 
